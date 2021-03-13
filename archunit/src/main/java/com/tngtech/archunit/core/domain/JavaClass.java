@@ -88,13 +88,13 @@ public class JavaClass implements JavaType, HasName.AndFullName, HasAnnotations<
         }
     });
     private final Set<JavaClass> interfaces = new HashSet<>();
-    private final Supplier<Set<JavaClass>> allInterfaces = Suppliers.memoize(new Supplier<Set<JavaClass>>() {
+    private final Supplier<Set<JavaClass>> allRawInterfaces = Suppliers.memoize(new Supplier<Set<JavaClass>>() {
         @Override
         public Set<JavaClass> get() {
             ImmutableSet.Builder<JavaClass> result = ImmutableSet.builder();
             for (JavaClass i : interfaces) {
                 result.add(i);
-                result.addAll(i.getAllInterfaces());
+                result.addAll(i.getAllRawInterfaces());
             }
             result.addAll(superclass.getAllInterfaces());
             return result.build();
@@ -708,13 +708,13 @@ public class JavaClass implements JavaType, HasName.AndFullName, HasAnnotations<
     }
 
     @PublicAPI(usage = ACCESS)
-    public Set<JavaClass> getInterfaces() {
+    public Set<JavaClass> getRawInterfaces() {
         return interfaces;
     }
 
     @PublicAPI(usage = ACCESS)
-    public Set<JavaClass> getAllInterfaces() {
-        return allInterfaces.get();
+    public Set<JavaClass> getAllRawInterfaces() {
+        return allRawInterfaces.get();
     }
 
     /**
@@ -730,7 +730,7 @@ public class JavaClass implements JavaType, HasName.AndFullName, HasAnnotations<
         return ImmutableSet.<JavaClass>builder()
                 .add(this)
                 .addAll(getAllRawSuperclasses())
-                .addAll(getAllInterfaces())
+                .addAll(getAllRawInterfaces())
                 .build();
     }
 
@@ -1191,7 +1191,7 @@ public class JavaClass implements JavaType, HasName.AndFullName, HasAnnotations<
     @PublicAPI(usage = ACCESS)
     public boolean isAssignableTo(DescribedPredicate<? super JavaClass> predicate) {
         List<JavaClass> possibleTargets = ImmutableList.<JavaClass>builder()
-                .addAll(getClassHierarchy()).addAll(getAllInterfaces()).build();
+                .addAll(getClassHierarchy()).addAll(getAllRawInterfaces()).build();
 
         return anyMatches(possibleTargets, predicate);
     }
@@ -1342,7 +1342,7 @@ public class JavaClass implements JavaType, HasName.AndFullName, HasAnnotations<
         }
 
         Set<JavaClass> getAllInterfaces() {
-            return rawType.isPresent() ? rawType.get().getAllInterfaces() : Collections.<JavaClass>emptySet();
+            return rawType.isPresent() ? rawType.get().getAllRawInterfaces() : Collections.<JavaClass>emptySet();
         }
 
         Superclass withRawType(JavaClass newRawType) {
