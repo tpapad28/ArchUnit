@@ -46,14 +46,12 @@ public class LakosMetricsTest {
 
 
 
-    static class ComponentContent implements LakosMetrics.HasMetricsComponentDependency {
+    static class ComponentContent implements HasDependencies {
         final Set<MetricsComponentDependency> dependencies = new HashSet<>();
 
         @Override
         public Set<MetricsComponentDependency> getDependencies() {
             return dependencies;
         }
-
-        addDependency()
     }
 }

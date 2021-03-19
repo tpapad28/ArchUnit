@@ -15,8 +15,8 @@
  */
 package com.tngtech.archunit.library.metrics;
 
-public class DependentMetricsComponents<T> {
-    public static <T> DependentMetricsComponents<T> of(MetricsComponent<T>... components) {
-        return new DependentMetricsComponents<T>();
-    }
+import java.util.Set;
+
+interface HasDependencies<T> {
+    Set<T> getDependencies();
 }

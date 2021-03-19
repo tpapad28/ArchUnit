@@ -15,6 +15,7 @@
  */
 package com.tngtech.archunit.library.metrics;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableSet;
 
 import java.util.Set;
@@ -30,5 +31,16 @@ public class MetricsComponent<T> {
 
     public static <T> MetricsComponent<T> of(String identifier, T... elements) {
         return new MetricsComponent<T>(identifier, elements);
+    }
+
+    public Set<T> getElements() {
+        return elements;
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .add("identifier", identifier)
+                .toString();
     }
 }

@@ -15,11 +15,9 @@
  */
 package com.tngtech.archunit.library.metrics;
 
-import java.util.Set;
-
 public class LakosMetrics {
-    LakosMetrics calculate(MetricsComponents<? extends HasMetricsComponentDependency> components) {
-        DependentMetricsComponents
+    <T extends HasDependencies<T>> LakosMetrics calculate(MetricsComponents<T> components) {
+        MetricsComponentDependencyGraph.of(components);
         return new LakosMetrics();
     }
 
@@ -39,7 +37,4 @@ public class LakosMetrics {
         return 1.0;
     }
 
-    interface HasMetricsComponentDependency<T> {
-        Set<T> getDependencies();
-    }
 }
