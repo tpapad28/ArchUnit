@@ -15,8 +15,20 @@
  */
 package com.tngtech.archunit.library.metrics;
 
-public class MetricsComponent {
-    public static MetricsComponent of(String identifier) {
-        return new MetricsComponent();
+import com.google.common.collect.ImmutableSet;
+
+import java.util.Set;
+
+public class MetricsComponent<T> {
+    private final String identifier;
+    private final Set<T> elements;
+
+    MetricsComponent(String identifier, T... elements) {
+        this.identifier = identifier;
+        this.elements = ImmutableSet.copyOf(elements);
+    }
+
+    public static <T> MetricsComponent<T> of(String identifier, T... elements) {
+        return new MetricsComponent<T>(identifier, elements);
     }
 }

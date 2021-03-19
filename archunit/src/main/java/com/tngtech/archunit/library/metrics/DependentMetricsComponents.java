@@ -15,8 +15,8 @@
  */
 package com.tngtech.archunit.library.metrics;
 
-public class MetricsComponents<T> {
-    public static <T> MetricsComponents<T> of(MetricsComponent<T>... components) {
-        return new MetricsComponents<T>();
+public class DependentMetricsComponents<T> {
+    public static <T> DependentMetricsComponents<T> of(MetricsComponent<T>... components) {
+        return new DependentMetricsComponents<T>();
     }
 }
