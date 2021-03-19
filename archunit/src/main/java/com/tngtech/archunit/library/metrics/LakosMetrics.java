@@ -27,7 +27,7 @@ public class LakosMetrics {
         int cumulativeComponentDependency = 0;
         MetricsComponentDependencyGraph<T> graph = MetricsComponentDependencyGraph.of(components);
         for (MetricsComponent<T> component : components) {
-            cumulativeComponentDependency += 1 + graph.getDependenciesOf(component).size();
+            cumulativeComponentDependency += 1 + graph.getTransitiveDependencies(component).size();
         }
         this.cumulativeComponentDependency = cumulativeComponentDependency;
         this.averageComponentDependency = ((double)cumulativeComponentDependency) / components.size();

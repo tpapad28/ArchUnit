@@ -16,12 +16,15 @@
 package com.tngtech.archunit.library.metrics;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.SetMultimap;
+import com.tngtech.archunit.core.domain.Dependency;
+import com.tngtech.archunit.core.domain.JavaClass;
 
 public class MetricsComponentDependencyGraph<T extends HasDependencies<T>> {
     private final SetMultimap<MetricsComponent<T>, MetricsComponent<T>> componentDependencies;
@@ -71,7 +74,29 @@ public class MetricsComponentDependencyGraph<T extends HasDependencies<T>> {
         return new MetricsComponentDependencyGraph<T>(components);
     }
 
-    public Set<MetricsComponent<T>> getDependenciesOf(MetricsComponent<T> origin) {
+    public Set<MetricsComponent<T>> getDirectDependenciesOf(MetricsComponent<T> origin) {
         return componentDependencies.get(origin);
     }
+
+    public Set<MetricsComponent<T>> getTransitiveDependencies(MetricsComponent<T> origin) {
+        ImmutableSet.Builder<MetricsComponent<T>> transitiveDependencies = ImmutableSet.builder();
+        Set<JavaClass> analyzedClasses = new HashSet<>();  // to avoid infinite recursion for cyclic dependencies
+        addTransitiveDependenciesFrom(javaClass, transitiveDependencies, analyzedClasses);
+        return transitiveDependencies.build();
+    }
+
+    private static void addTransitiveDependenciesFrom(JavaClass javaClass, ImmutableSet.Builder<Dependency> transitiveDependencies, Set<JavaClass> analyzedClasses) {
+        analyzedClasses.add(javaClass);  // currently being analyzed
+        Set<JavaClass> targetClassesToRecurse = new HashSet<>();
+        for (Dependency dependency : javaClass.getDirectDependenciesFromSelf()) {
+            transitiveDependencies.add(dependency);
+            targetClassesToRecurse.add(dependency.getTargetClass().getBaseComponentType());
+        }
+        for (JavaClass targetClass : targetClassesToRecurse) {
+            if (!analyzedClasses.contains(targetClass)) {
+                addTransitiveDependenciesFrom(targetClass, transitiveDependencies, analyzedClasses);
+            }
+        }
+    }
+
 }

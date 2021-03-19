@@ -2,6 +2,7 @@ package com.tngtech.archunit.library.metrics;
 
 import org.junit.Test;
 
+import static com.tngtech.archunit.testutil.Assertions.assertThatDependencies;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class MetricsComponentDependencyGraphTest {
@@ -18,7 +19,7 @@ public class MetricsComponentDependencyGraphTest {
 
         MetricsComponentDependencyGraph<TestElement> graph = MetricsComponentDependencyGraph.of(component1, component2);
 
-        assertThat(graph.getDependenciesOf(component1)).containsOnly(component2);
+        assertThat(graph.getDirectDependenciesOf(component1)).containsOnly(component2);
     }
 
     @Test
@@ -35,7 +36,7 @@ public class MetricsComponentDependencyGraphTest {
 
         MetricsComponentDependencyGraph<TestElement> graph = MetricsComponentDependencyGraph.of(component1, component2);
 
-        assertThat(graph.getDependenciesOf(component1)).containsOnly(component2);
+        assertThat(graph.getDirectDependenciesOf(component1)).containsOnly(component2);
     }
 
     @Test
@@ -48,7 +49,25 @@ public class MetricsComponentDependencyGraphTest {
         MetricsComponent<TestElement> component = MetricsComponent.of("component", elementInsideOfComponent);
         MetricsComponentDependencyGraph<TestElement> graph = MetricsComponentDependencyGraph.of(component);
 
-        assertThat(graph.getDependenciesOf(component)).as("dependencies of component").isEmpty();
+        assertThat(graph.getDirectDependenciesOf(component)).as("dependencies of component").isEmpty();
     }
+
+    @Test
+    public void findsTransitiveDependenciesInAcyclicGraph() {
+        LakosMetricsTest.TestMetricsComponent a = new LakosMetricsTest.TestMetricsComponent("A");
+        LakosMetricsTest.TestMetricsComponent b = new LakosMetricsTest.TestMetricsComponent("B");
+        LakosMetricsTest.TestMetricsComponent c = new LakosMetricsTest.TestMetricsComponent("C");
+        LakosMetricsTest.TestMetricsComponent d = new LakosMetricsTest.TestMetricsComponent("D");
+        a.addDependencies(b, c);
+        c.addDependency(d);
+
+        MetricsComponentDependencyGraph<TestElement> graph = MetricsComponentDependencyGraph.of(a, b, c, d);
+
+        assertThat(graph.getTransitiveDependencies(a)).containsOnly(b,c,d);
+        assertThat(graph.getTransitiveDependencies(b)).isEmpty();
+        assertThat(graph.getTransitiveDependencies(c)).containsOnly(d);
+        assertThat(graph.getTransitiveDependencies(d)).isEmpty();
+    }
+
 
 }
