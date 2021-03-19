@@ -15,12 +15,14 @@
  */
 package com.tngtech.archunit.library.metrics;
 
-import com.google.common.base.MoreObjects;
-import com.google.common.collect.ImmutableSet;
-
+import java.util.Collection;
 import java.util.Set;
 
-public class MetricsComponent<T> {
+import com.google.common.base.MoreObjects;
+import com.google.common.collect.ImmutableSet;
+import com.tngtech.archunit.base.ForwardingCollection;
+
+public class MetricsComponent<T> extends ForwardingCollection<T> {
     private final String identifier;
     private final Set<T> elements;
 
@@ -34,6 +36,11 @@ public class MetricsComponent<T> {
     }
 
     public Set<T> getElements() {
+        return elements;
+    }
+
+    @Override
+    protected Collection<T> delegate() {
         return elements;
     }
 
