@@ -15,26 +15,39 @@
  */
 package com.tngtech.archunit.library.metrics;
 
+import java.util.Collection;
+
 public class LakosMetrics {
-    <T extends HasDependencies<T>> LakosMetrics calculate(MetricsComponents<T> components) {
-        MetricsComponentDependencyGraph.of(components);
-        return new LakosMetrics();
+    private final int cumulativeComponentDependency;
+    private final double averageComponentDependency;
+    private final double relativeAverageComponentDependency;
+    private final double normalizedCumulativeComponentDependency;
+
+    <T extends HasDependencies<T>> LakosMetrics(Collection<MetricsComponent<T>> components) {
+        int cumulativeComponentDependency = 0;
+        MetricsComponentDependencyGraph<T> graph = MetricsComponentDependencyGraph.of(components);
+        for (MetricsComponent<T> component : components) {
+            cumulativeComponentDependency += 1 + graph.getDependenciesOf(component).size();
+        }
+        this.cumulativeComponentDependency = cumulativeComponentDependency;
+        this.averageComponentDependency = ((double)cumulativeComponentDependency) / components.size();
+        this.relativeAverageComponentDependency = averageComponentDependency / components.size();
+        this.normalizedCumulativeComponentDependency = 1;
     }
 
     public int getCumulativeComponentDependency() {
-        return 1;
+        return cumulativeComponentDependency;
     }
 
     public double getAverageComponentDependency() {
-        return 1.0;
+        return averageComponentDependency;
     }
 
     public double getRelativeAverageComponentDependency() {
-        return 1.0;
+        return relativeAverageComponentDependency;
     }
 
     public double getNormalizedCumulativeComponentDependency() {
-        return 1.0;
+        return normalizedCumulativeComponentDependency;
     }
-
 }

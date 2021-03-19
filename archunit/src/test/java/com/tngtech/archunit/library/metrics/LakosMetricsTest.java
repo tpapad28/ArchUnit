@@ -2,17 +2,15 @@ package com.tngtech.archunit.library.metrics;
 
 import org.junit.Test;
 
-import java.util.HashSet;
-import java.util.Set;
-
+import static com.google.common.collect.Iterables.getOnlyElement;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class LakosMetricsTest {
 
     @Test
-    public void Lakos_metrics_of_a_single_component() {
-        MetricsComponent<ComponentContent> component = MetricsComponent.of("component");
-        MetricsComponents<ComponentContent> components = MetricsComponents.of(component);
+    public void lakos_metrics_of_a_single_component() {
+        MetricsComponent<TestElement> component = new TestMetricsComponent("component");
+        MetricsComponents<TestElement> components = MetricsComponents.of(component);
 
         LakosMetrics metrics = ArchitectureMetrics.lakosMetrics(components);
 
@@ -27,31 +25,50 @@ public class LakosMetricsTest {
     }
 
     @Test
-    public void Lakos_metrics_of_multiple_components() {
-        MetricsComponent<ComponentContent> componentA = MetricsComponent.of("component A", new ComponentContent(), new ComponentContent());
-        MetricsComponent<ComponentContent> componentB = MetricsComponent.of("component B");
-        MetricsComponents<ComponentContent> components = MetricsComponents.of(componentA, componentB);
+    public void lakos_metrics_of_two_dependent_components() {
+        TestMetricsComponent componentA = new TestMetricsComponent("component A");
+        TestMetricsComponent componentB = new TestMetricsComponent("component B");
+        componentA.addDependency(componentB);
+        MetricsComponents<TestElement> components = MetricsComponents.of(componentA, componentB);
 
         LakosMetrics metrics = ArchitectureMetrics.lakosMetrics(components);
 
         assertThat(metrics.getCumulativeComponentDependency())
-                .as("CCD").isEqualTo(1);
+                .as("CCD").isEqualTo(3);
         assertThat(metrics.getAverageComponentDependency())
-                .as("ACD").isEqualTo(1.0);
+                .as("ACD").isEqualTo(1.5);
         assertThat(metrics.getRelativeAverageComponentDependency())
-                .as("RACD").isEqualTo(1.0);
+                .as("RACD").isEqualTo(0.75);
         assertThat(metrics.getNormalizedCumulativeComponentDependency())
-                .as("NCCD").isEqualTo(1.0);
+                .as("NCCD").isEqualTo(1);
     }
 
+    @Test
+    public void lakos_metrics_of_multiple_dependent_components() {
+//        TestMetricsComponent componentA = new TestMetricsComponent("component A");
+//        TestMetricsComponent componentB = new TestMetricsComponent("component B");
+//        componentA.addDependency(componentB);
+//        MetricsComponents<TestElement> components = MetricsComponents.of(componentA, componentB);
+//
+//        LakosMetrics metrics = ArchitectureMetrics.lakosMetrics(components);
+//
+//        assertThat(metrics.getCumulativeComponentDependency())
+//                .as("CCD").isEqualTo(3);
+//        assertThat(metrics.getAverageComponentDependency())
+//                .as("ACD").isEqualTo(1.5);
+//        assertThat(metrics.getRelativeAverageComponentDependency())
+//                .as("RACD").isEqualTo(0.75);
+//        assertThat(metrics.getNormalizedCumulativeComponentDependency())
+//                .as("NCCD").isEqualTo(1);
+    }
 
+    static class TestMetricsComponent extends MetricsComponent<TestElement> {
+        TestMetricsComponent(String identifier) {
+            super(identifier, new TestElement());
+        }
 
-    static class ComponentContent implements HasDependencies {
-        final Set<MetricsComponentDependency> dependencies = new HashSet<>();
-
-        @Override
-        public Set<MetricsComponentDependency> getDependencies() {
-            return dependencies;
+        void addDependency(TestMetricsComponent target) {
+            getOnlyElement(getElements()).addDependency(getOnlyElement(target.getElements()));
         }
     }
 }

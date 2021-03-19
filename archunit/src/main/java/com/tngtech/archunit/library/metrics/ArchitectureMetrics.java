@@ -16,7 +16,7 @@
 package com.tngtech.archunit.library.metrics;
 
 public class ArchitectureMetrics {
-    public static LakosMetrics lakosMetrics(MetricsComponents components) {
-        return new LakosMetrics().calculate(components);
+    public static <T extends HasDependencies<T>> LakosMetrics lakosMetrics(MetricsComponents<T> components) {
+        return new LakosMetrics(components);
     }
 }

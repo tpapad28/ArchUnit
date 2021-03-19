@@ -26,13 +26,10 @@ public class MetricsComponent<T> extends ForwardingCollection<T> {
     private final String identifier;
     private final Set<T> elements;
 
+    @SafeVarargs
     MetricsComponent(String identifier, T... elements) {
         this.identifier = identifier;
         this.elements = ImmutableSet.copyOf(elements);
-    }
-
-    public static <T> MetricsComponent<T> of(String identifier, T... elements) {
-        return new MetricsComponent<T>(identifier, elements);
     }
 
     public Set<T> getElements() {
@@ -49,5 +46,9 @@ public class MetricsComponent<T> extends ForwardingCollection<T> {
         return MoreObjects.toStringHelper(this)
                 .add("identifier", identifier)
                 .toString();
+    }
+
+    public static <T> MetricsComponent<T> of(String identifier, T... elements) {
+        return new MetricsComponent<T>(identifier, elements);
     }
 }

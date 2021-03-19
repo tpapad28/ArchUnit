@@ -15,18 +15,25 @@
  */
 package com.tngtech.archunit.library.metrics;
 
+import com.google.common.collect.ImmutableSet;
 import com.tngtech.archunit.base.ForwardingCollection;
 
 import java.util.Collection;
-import java.util.Collections;
 
 public class MetricsComponents<T> extends ForwardingCollection<MetricsComponent<T>> {
-    public static <T> MetricsComponents<T> of(MetricsComponent<T>... components) {
-        return new MetricsComponents<T>();
+    private final ImmutableSet<MetricsComponent<T>> components;
+
+    private MetricsComponents(ImmutableSet<MetricsComponent<T>> components) {
+        this.components = components;
     }
 
     @Override
     protected Collection<MetricsComponent<T>> delegate() {
-        return Collections.emptyList();
+        return components;
+    }
+
+    @SafeVarargs
+    public static <T> MetricsComponents<T> of(MetricsComponent<T>... components) {
+        return new MetricsComponents<T>(ImmutableSet.copyOf(components));
     }
 }

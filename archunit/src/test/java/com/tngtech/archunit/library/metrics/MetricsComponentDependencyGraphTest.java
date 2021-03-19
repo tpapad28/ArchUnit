@@ -1,8 +1,5 @@
 package com.tngtech.archunit.library.metrics;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -54,16 +51,4 @@ public class MetricsComponentDependencyGraphTest {
         assertThat(graph.getDependenciesOf(component)).as("dependencies of component").isEmpty();
     }
 
-    static class TestElement implements HasDependencies<TestElement> {
-        final Set<TestElement> dependencies = new HashSet<>();
-
-        @Override
-        public Set<TestElement> getDependencies() {
-            return dependencies;
-        }
-
-        void addDependency(TestElement element) {
-            dependencies.add(element);
-        }
-    }
 }
