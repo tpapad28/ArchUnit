@@ -1,13 +1,8 @@
 package com.tngtech.archunit.library.metrics;
 
-import com.tngtech.archunit.core.domain.JavaClassTransitiveDependenciesTest;
-import com.tngtech.archunit.core.domain.JavaClasses;
-import com.tngtech.archunit.core.importer.ClassFileImporter;
 import org.assertj.core.data.Offset;
 import org.junit.Test;
 
-import static com.google.common.collect.Iterables.getOnlyElement;
-import static com.tngtech.archunit.testutil.Assertions.assertThatDependencies;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class LakosMetricsTest {
@@ -68,21 +63,4 @@ public class LakosMetricsTest {
         assertThat(metrics.getNormalizedCumulativeComponentDependency())
                 .as("NCCD").isCloseTo(6/5.0, Offset.offset(0.01));
     }
-
-    static class TestMetricsComponent extends MetricsComponent<TestElement> {
-        TestMetricsComponent(String identifier) {
-            super(identifier, new TestElement());
-        }
-
-        void addDependency(TestMetricsComponent target) {
-            getOnlyElement(getElements()).addDependency(getOnlyElement(target.getElements()));
-        }
-
-        public void addDependencies(TestMetricsComponent... components) {
-            for (TestMetricsComponent component : components) {
-                addDependency(component);
-            }
-        }
-    }
-
 }

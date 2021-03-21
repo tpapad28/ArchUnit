@@ -1,5 +1,8 @@
 package com.tngtech.archunit.library.metrics;
 
+import com.tngtech.archunit.core.domain.JavaClassTransitiveDependenciesTest;
+import com.tngtech.archunit.core.domain.JavaClasses;
+import com.tngtech.archunit.core.importer.ClassFileImporter;
 import org.junit.Test;
 
 import static com.tngtech.archunit.testutil.Assertions.assertThatDependencies;
@@ -54,10 +57,10 @@ public class MetricsComponentDependencyGraphTest {
 
     @Test
     public void findsTransitiveDependenciesInAcyclicGraph() {
-        LakosMetricsTest.TestMetricsComponent a = new LakosMetricsTest.TestMetricsComponent("A");
-        LakosMetricsTest.TestMetricsComponent b = new LakosMetricsTest.TestMetricsComponent("B");
-        LakosMetricsTest.TestMetricsComponent c = new LakosMetricsTest.TestMetricsComponent("C");
-        LakosMetricsTest.TestMetricsComponent d = new LakosMetricsTest.TestMetricsComponent("D");
+        TestMetricsComponent a = new TestMetricsComponent("A");
+        TestMetricsComponent b = new TestMetricsComponent("B");
+        TestMetricsComponent c = new TestMetricsComponent("C");
+        TestMetricsComponent d = new TestMetricsComponent("D");
         a.addDependencies(b, c);
         c.addDependency(d);
 
@@ -69,5 +72,24 @@ public class MetricsComponentDependencyGraphTest {
         assertThat(graph.getTransitiveDependencies(d)).isEmpty();
     }
 
+    @Test
+    public void findsTransitiveDependenciesInCyclicGraph() {
+        TestMetricsComponent a = new TestMetricsComponent("A");
+        TestMetricsComponent b = new TestMetricsComponent("B");
+        TestMetricsComponent c = new TestMetricsComponent("C");
+        TestMetricsComponent d = new TestMetricsComponent("D");
+        TestMetricsComponent e = new TestMetricsComponent("E");
+        a.addDependencies(b, c, d);
+        c.addDependency(a);
+        d.addDependency(e);
+        e.addDependency(a);
 
+        MetricsComponentDependencyGraph<TestElement> graph = MetricsComponentDependencyGraph.of(a, b, c, d, e);
+
+        assertThat(graph.getTransitiveDependencies(a)).containsOnly(b, c, d, e, a);
+        assertThat(graph.getTransitiveDependencies(b)).isEmpty();
+        assertThat(graph.getTransitiveDependencies(c)).containsOnly(a, b, c, d, e);
+        assertThat(graph.getTransitiveDependencies(d)).containsOnly(e, a, b, c, d);
+        assertThat(graph.getTransitiveDependencies(e)).containsOnly(e, a, b, c, d);
+    }
 }

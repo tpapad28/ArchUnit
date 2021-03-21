@@ -23,8 +23,6 @@ import java.util.Set;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.SetMultimap;
-import com.tngtech.archunit.core.domain.Dependency;
-import com.tngtech.archunit.core.domain.JavaClass;
 
 public class MetricsComponentDependencyGraph<T extends HasDependencies<T>> {
     private final SetMultimap<MetricsComponent<T>, MetricsComponent<T>> componentDependencies;
@@ -80,21 +78,21 @@ public class MetricsComponentDependencyGraph<T extends HasDependencies<T>> {
 
     public Set<MetricsComponent<T>> getTransitiveDependencies(MetricsComponent<T> origin) {
         ImmutableSet.Builder<MetricsComponent<T>> transitiveDependencies = ImmutableSet.builder();
-        Set<JavaClass> analyzedClasses = new HashSet<>();  // to avoid infinite recursion for cyclic dependencies
-        addTransitiveDependenciesFrom(javaClass, transitiveDependencies, analyzedClasses);
+        Set<MetricsComponent<T>> analyzedComponents = new HashSet<>();  // to avoid infinite recursion for cyclic dependencies
+        addTransitiveDependenciesFrom(origin, transitiveDependencies, analyzedComponents);
         return transitiveDependencies.build();
     }
 
-    private static void addTransitiveDependenciesFrom(JavaClass javaClass, ImmutableSet.Builder<Dependency> transitiveDependencies, Set<JavaClass> analyzedClasses) {
-        analyzedClasses.add(javaClass);  // currently being analyzed
-        Set<JavaClass> targetClassesToRecurse = new HashSet<>();
-        for (Dependency dependency : javaClass.getDirectDependenciesFromSelf()) {
+    private void addTransitiveDependenciesFrom(MetricsComponent<T> component, ImmutableSet.Builder<MetricsComponent<T>> transitiveDependencies, Set<MetricsComponent<T>> analyzedComponents) {
+        analyzedComponents.add(component);  // currently being analyzed
+        Set<MetricsComponent<T>> dependencyTargetsToRecurse = new HashSet<>();
+        for (MetricsComponent<T> dependency : getDirectDependenciesOf(component)) {
             transitiveDependencies.add(dependency);
-            targetClassesToRecurse.add(dependency.getTargetClass().getBaseComponentType());
+            dependencyTargetsToRecurse.add(dependency);
         }
-        for (JavaClass targetClass : targetClassesToRecurse) {
-            if (!analyzedClasses.contains(targetClass)) {
-                addTransitiveDependenciesFrom(targetClass, transitiveDependencies, analyzedClasses);
+        for (MetricsComponent<T> dependency : dependencyTargetsToRecurse) {
+            if (!analyzedComponents.contains(dependency)) {
+                addTransitiveDependenciesFrom(dependency, transitiveDependencies, analyzedComponents);
             }
         }
     }
